@@ -28,5 +28,6 @@ import (
 )
 
 func main() {
+	// etcd 服务端的入口函数调用
 	etcdmain.Main(os.Args)
 }

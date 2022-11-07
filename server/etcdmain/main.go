@@ -23,6 +23,7 @@ import (
 )
 
 func Main(args []string) {
+	// 首先检查 etcd 宿主机的 CPU 架构是否可用
 	checkSupportArch()
 
 	if len(args) > 1 {

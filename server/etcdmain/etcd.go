@@ -256,12 +256,14 @@ func identifyDataDirOrDie(lg *zap.Logger, dir string) dirType {
 }
 
 func checkSupportArch() {
+	// 初始化默认日志的日志级别为 Info
 	lg, err := logutil.CreateDefaultZapLogger(zap.InfoLevel)
 	if err != nil {
 		panic(err)
 	}
 	// To add a new platform, check https://github.com/etcd-io/website/blob/main/content/en/docs/${VERSION}/op-guide/supported-platform.md.
 	// The ${VERSION} is the etcd version, e.g. v3.5, v3.6 etc.
+	// 针对 amd64/arm64/ppc64le/s390x 几种处理器架构直接函数返回，表明检查通过
 	if runtime.GOARCH == "amd64" ||
 		runtime.GOARCH == "arm64" ||
 		runtime.GOARCH == "ppc64le" ||
@@ -270,12 +272,15 @@ func checkSupportArch() {
 	}
 	// unsupported arch only configured via environment variable
 	// so unset here to not parse through flag
-	defer os.Unsetenv("ETCD_UNSUPPORTED_ARCH")
+	defer os.Unsetenv("ETCD_UNSUPPORTED_ARCH") // 函数执行完毕前清理 ETCD_UNSUPPORTED_ARCH 环境变量防止传递到 flag 中
+
+	// 如果要支持其他 Go 语言支持的处理器架构，可以通过设置环境变量 ETCD_UNSUPPORTED_ARCH 的方式进行配置，这里进行了运行态的值与环境变量的值的一致性校验
 	if env, ok := os.LookupEnv("ETCD_UNSUPPORTED_ARCH"); ok && env == runtime.GOARCH {
 		lg.Info("running etcd on unsupported architecture since ETCD_UNSUPPORTED_ARCH is set", zap.String("arch", env))
 		return
 	}
 
+	// 如果校验不通过日志记录 error，并且进程以状态码为 1 进行退出
 	lg.Error("running etcd on unsupported architecture since ETCD_UNSUPPORTED_ARCH is set", zap.String("arch", runtime.GOARCH))
 	os.Exit(1)
 }
